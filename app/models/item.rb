@@ -66,9 +66,16 @@ class Item < ActiveRecord::Base
   end
 
   private
+  def new_face?
+    kind == 'New face'
+  end
+
   def face_is_in_the_future
-    if new_record? && kind == 'New face' && (date || Time.at(0)).to_time < Time.now.beginning_of_day
-      errors.add(:base, "Please choose a date in present or future")
-    end
+    return unless new_record?
+    return unless new_face?
+    return unless date?
+    return unless date.to_time < Time.zone.now.beginning_of_day
+
+    errors.add(:base, 'Please choose a date in present or future')
   end
 end

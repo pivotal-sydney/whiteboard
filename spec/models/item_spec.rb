@@ -3,6 +3,13 @@ require 'rails_helper'
 describe Item do
   let(:item) { build_stubbed(:item) }
 
+  around(:each) do |example|
+    Time.use_zone('Sydney') do
+      example.run
+    end
+  end
+
+
   describe "default_scope" do
     let!(:furthest_item) { create(:item, date: 5.days.from_now) }
     let!(:closest_item) { create(:item, date: 1.days.from_now) }
@@ -27,10 +34,10 @@ describe Item do
       let(:item) { build(:new_face) }
 
       context 'when new' do
-        let(:yesterday) { Time.zone.today - 1.day }
+        let(:yesterday)  { (Time.zone.today - 1.day).to_time }
 
         it 'should disallow a past creation date' do
-          Timecop.freeze do
+          Timecop.freeze('2001-01-01 09:00') do
             item = build(:new_face, date: yesterday)
             expect(item).to_not be_valid
           end
@@ -39,7 +46,7 @@ describe Item do
 
       context 'when updating' do
         before do
-          Timecop.freeze('2014-04-14 12:22:33') do
+          Timecop.freeze('2014-04-14 08:22:33') do
             item.save!
           end
         end

@@ -5,6 +5,12 @@ describe "Adding new faces", js: true do
   let(:timezone) { ActiveSupport::TimeZone.new(standup.time_zone_name) }
   let(:date_five_days) { timezone.now + 5.days }
 
+  around(:each) do |example|
+    Time.use_zone('Sydney') do
+      example.run
+    end
+  end
+
   it "doesn't allow start dates in the past" do
     new_face_date = Date.new(1999, 1, 8).to_s
 

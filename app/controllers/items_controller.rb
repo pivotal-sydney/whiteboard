@@ -1,5 +1,6 @@
 class ItemsController < ApplicationController
-  before_filter :load_standup, except: [:create]
+  before_filter :load_standup
+  around_filter :standup_timezone
 
   def create
     @item = Item.new(params[:item])
@@ -62,12 +63,21 @@ class ItemsController < ApplicationController
   end
 
   def load_standup
+    @standup = Standup.find_by(id: params[:id])
+
     if params[:standup_id].present?
       standup = Standup.find(params[:standup_id])
+    elsif params[:item][:standup_id].present?
+      standup = Standup.find(params[:item][:standup_id])
     else
       standup = Item.find(params[:id]).standup
     end
 
     @standup = StandupPresenter.new(standup)
+  end
+
+  def standup_timezone(&block)
+    return yield unless @standup
+    Time.use_zone(@standup.time_zone_name, &block)
   end
 end

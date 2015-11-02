@@ -67,6 +67,10 @@ describe StandupsController do
       expect(assigns[:standup]).to eq standup
       expect(response).to be_ok
     end
+
+    it_behaves_like "an action occurring within the standup's timezone" do
+      after { get :edit, id: standup.id }
+    end
   end
 
   describe "#show" do
@@ -85,6 +89,10 @@ describe StandupsController do
       expect(flash[:error]).to eq('A standup with the ID 12831 does not exist.')
       expect(response).to redirect_to(standups_path)
     end
+
+    it_behaves_like "an action occurring within the standup's timezone" do
+      after { get :show, id: 12831 }
+    end
   end
 
   describe "#update" do
@@ -102,6 +110,10 @@ describe StandupsController do
         expect(response).to render_template 'standups/edit'
       end
     end
+
+    it_behaves_like "an action occurring within the standup's timezone" do
+      after { put :update, id: standup.id, standup: {title: "New Title"} }
+    end
   end
 
   describe "#destroy" do
@@ -112,6 +124,10 @@ describe StandupsController do
         post :destroy, id: standup.id
       }.to change(Standup, :count).by(-1)
       expect(response).to redirect_to standups_path
+    end
+
+    it_behaves_like "an action occurring within the standup's timezone" do
+      after { post :destroy, id: standup.id }
     end
   end
 

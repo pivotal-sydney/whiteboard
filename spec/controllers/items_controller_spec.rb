@@ -5,10 +5,15 @@ describe ItemsController do
   let(:params) { {standup_id: standup.id} }
   before do
     request.session[:logged_in] = true
+    Timecop.freeze(Time.zone.local(2001,1,1, 20,00))
+  end
+
+  after do
+    Timecop.return
   end
 
   describe "#create" do
-    let(:valid_params) { {item: attributes_for(:item).merge(standup_id: standup.to_param)} }
+    let(:valid_params) { {item: attributes_for(:item).merge(standup_id: standup.to_param), standup_id: standup.to_param} }
 
     it "should allow you to create an item" do
       expect {
@@ -22,7 +27,7 @@ describe ItemsController do
     end
 
     it "should render new on failure" do
-      post :create, item: {}
+      post :create, item: {}, standup_id: standup.to_param
       expect(response).to render_template 'items/new'
     end
 
@@ -35,15 +40,13 @@ describe ItemsController do
       }.to change { standup_post.items.count }.by(1)
       expect(response).to redirect_to(edit_post_path(standup_post))
     end
+
+    it_behaves_like "an action occurring within the standup's timezone" do
+      after { post :create, valid_params }
+    end
   end
 
   describe '#new' do
-    before do
-      Timecop.freeze(Time.zone.local(2001,1,1, 20,00))
-    end
-    after do
-      Timecop.return
-    end
 
     it "should create a new Item object" do
       get :new, params
@@ -80,6 +83,7 @@ describe ItemsController do
     it "generates a hash of items by type" do
       help = create(:item, kind: "Help", standup: standup)
       new_face = create(:new_face, standup: standup)
+      binding.pry
       interesting = create(:item, kind: "Interesting", standup: standup)
 
       get :index, params
