@@ -46,6 +46,14 @@ describe StandupsController do
         expect(response).to be_ok
         expect(assigns[:standups]).to include(standup1, standup2)
       end
+
+      it 'renders json with request header' do
+        standup1 = create(:standup)
+        request.accept = Mime::JSON.to_s
+        get :index
+        expect(response.content_type).to eq(Mime::JSON.to_s)
+        expect(JSON.parse(response.body)).to eq {data: [standup1]}
+      end
     end
 
     it 'sorts all standups alphabetically' do

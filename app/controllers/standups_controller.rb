@@ -20,6 +20,14 @@ class StandupsController < ApplicationController
 
   def index
     @standups = Standup.all.sort { |a, b| a.title.downcase <=> b.title.downcase }
+    respond_to do |format|
+      format.json {
+        render json: {data: @standups}
+      }
+      format.html {
+        @standups
+      }
+    end
   end
 
   def edit;
